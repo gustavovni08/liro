@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { TextInput, View, Button, StyleSheet } from "react-native";
 
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth'
+import { useNavigation } from "@react-navigation/native";
+
 const SignUpScreen = () => {
   const styles = StyleSheet.create({
     container: {
@@ -19,24 +22,24 @@ const SignUpScreen = () => {
     },
   });
   
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const navigation = useNavigation();
+  const auth = getAuth();
 
   const handleSignUp = () => {
-    // Lógica para enviar os dados do formulário ao servidor
-    console.log('Send data');
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+
+      // Register successful
+      navigation.navigate('Home')
+    }) 
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Nome de usuário"
-        onChangeText={setUsername}
-        value={username}
-      />
       <TextInput
         style={styles.input}
         placeholder="Endereço de e-mail"
@@ -48,13 +51,6 @@ const SignUpScreen = () => {
         placeholder="Senha"
         onChangeText={setPassword}
         value={password}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirme a senha"
-        onChangeText={setConfirmPassword}
-        value={confirmPassword}
         secureTextEntry
       />
       <Button title="Cadastrar" onPress={handleSignUp} />
