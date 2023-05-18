@@ -9,27 +9,18 @@ import { View, Text, StyleSheet, Button } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import { TouchableOpacity } from "react-native";
+import { getStorage, ref, uploadBytes, getDownloadURL  } from "firebase/storage";
+import { useState } from "react"
 
 const ProfileScreen = () => {
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      width: "100%",
-    },
-    verifiedEmail: {
-      color: "green",
-    },
-    notVerifiedEmail: {
-      color: "red",
-    },
-  });
 
   const navigation = useNavigation();
   const auth = getAuth();
+  const storage = getStorage();
+
   const user = auth.currentUser;
-  const profilePhoto = user.photoURL;
+  const storageRef = ref(storage, `${user.email}`)
+  const [profilePhoto, setProfilePhoto] = useState(user.photoURL)
 
   const handleSignOut = () => {
     signOut(auth)
@@ -43,23 +34,20 @@ const ProfileScreen = () => {
 
   const handleProfilePhoto = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-        
-    })
-
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+  
     if (!result.canceled) {
-        updateProfile(user, { photoURL: result.uri })
-          .then(() => {
-            console.log("Profile Updated!");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+      uploadBytes(storageRef, result).then((snapshot) =>{
+        console.log('uia')
+        return snapshot.storageRef.getDownloadURL()
+      })        
     }
-  }
+  };
+  
 
   const handleVerifyEmail = () => {
     sendEmailVerification(user).then(() => {
@@ -103,5 +91,20 @@ const ProfileScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  verifiedEmail: {
+    color: "green",
+  },
+  notVerifiedEmail: {
+    color: "red",
+  },
+});
 
 export { ProfileScreen };

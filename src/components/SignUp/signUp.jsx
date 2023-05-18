@@ -4,24 +4,11 @@ import { TextInput, View, Button, StyleSheet } from "react-native";
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth'
 import { useNavigation } from "@react-navigation/native";
 
+import { doc, setDoc } from "firebase/firestore";
+import database from "../../config/databaseConfig";
+
 const SignUpScreen = () => {
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%'
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 4,
-      padding: 5,
-      marginVertical: 10,
-      width: '80%',
-    },
-  });
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,7 +20,10 @@ const SignUpScreen = () => {
     .then((userCredential) => {
       const user = userCredential.user;
 
-      // Register successful
+      
+      const userRef = doc(database, 'usuarios', email)
+      setDoc(userRef, {foto: ""})
+
       navigation.navigate('Home')
     }) 
   };
@@ -57,5 +47,22 @@ const SignUpScreen = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    padding: 5,
+    marginVertical: 10,
+    width: '80%',
+  },
+});
 
 export { SignUpScreen };
